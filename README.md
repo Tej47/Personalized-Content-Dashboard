@@ -29,6 +29,18 @@ A smart, customizable dashboard that aggregates real-time news and movie trends.
 
 ---
 
+# 🚀 Vercel Deployment
+
+Follow link: https://personalized-content-dashboard-8j9wq5w9f.vercel.app/
+## ⚠️ Known Limitations
+
+**News API Restriction:**
+Please note that the **NewsAPI** free tier ("Developer Plan") strictly limits API requests to `localhost` only.
+* **On the Live Vercel Demo:** You may not see any News Content Cards
+* **Locally:** The News feed functions perfectly. To see the full integration, please clone the repo and run it locally (`npm run dev`).
+
+*The Movies feed (TMDB) works perfectly in both live and local environments.*
+
 ## 🚀 Getting Started
 
 Follow these steps to run the project locally.
