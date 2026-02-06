@@ -150,8 +150,6 @@ Fetched dynamically
 
 Merged into a single feed
 
-Shuffled to provide variety when no search is active
-
 Infinite scrolling loads additional content seamlessly as the user scrolls.
 
 3️⃣ Search Interaction
@@ -162,9 +160,7 @@ When a search query is active:
 
 The feed switches to filtered results
 
-Shuffle is disabled to maintain result relevance
-
-Clearing the search query restores the default shuffled feed.
+Clearing the search query restores the default feed.
 
 4️⃣ Content Personalization (Preferences)
 
@@ -199,8 +195,6 @@ The Favorites page:
 Displays only saved items
 
 Allows drag-and-drop reordering for personalization
-
-Reordering provides visual feedback and improves content organization.
 
 6️⃣ Profile Customization
 
