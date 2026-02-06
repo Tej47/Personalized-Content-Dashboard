@@ -10,6 +10,16 @@ import { useEffect } from 'react';
 
 
 export default function SettingsPage() {
+    const dispatch = useDispatch();
+    const preferences = useSelector((state: RootState) => state.user.preferences);
+
+    const user = useSelector((state: RootState) => state.user.user);
+
+
+    const availableCategories = [
+        'technology', 'business', 'sports', 'entertainment', 'health', 'science'
+    ];
+    
     const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
     const router = useRouter();
     //If not logged in, pushes back to login page
@@ -20,16 +30,6 @@ export default function SettingsPage() {
     }, [isAuthenticated, router]);
 
     if (!isAuthenticated) return null;
-
-    const dispatch = useDispatch();
-    const preferences = useSelector((state: RootState) => state.user.preferences);
-
-    const user = useSelector((state: RootState) => state.user.user);
-
-
-    const availableCategories = [
-        'technology', 'business', 'sports', 'entertainment', 'health', 'science'
-    ];
 
     return (
         <div className="flex min-h-screen bg-gray-100 dark:bg-black transition-colors duration-300">

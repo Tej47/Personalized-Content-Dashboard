@@ -9,6 +9,12 @@ import { Reorder } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 export default function FavoritesPage() {
+    const favorites = useSelector((state: RootState) => state.user.favorites);
+    const [items, setItems] = useState(favorites);
+    useEffect(() => {
+        setItems(favorites);
+    }, [favorites]);
+    
     const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
         const router = useRouter();
         //If not logged in, pushes back to login page
@@ -19,13 +25,6 @@ export default function FavoritesPage() {
         }, [isAuthenticated, router]);
     
         if (!isAuthenticated) return null;
-
-
-    const favorites = useSelector((state: RootState) => state.user.favorites);
-    const [items, setItems] = useState(favorites);
-    useEffect(() => {
-        setItems(favorites);
-    }, [favorites]);
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
