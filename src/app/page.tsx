@@ -6,7 +6,6 @@ import { MainFeed } from "@/components/dashboard/MainFeed";
 import { RootState } from "@/store/store";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { Analytics } from "@vercel/analytics/next"
 
 export default function Home() {
     const [searchQuery, setSearchQuery] = useState('');

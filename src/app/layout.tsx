@@ -1,5 +1,6 @@
 import './globals.css';
 import ClientProviders from '@/components/ClientProviders';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
     title: 'ContentHub - Personalized Dashboard',
@@ -17,6 +18,7 @@ export default function RootLayout({
                 <ClientProviders>
                     {children}
                 </ClientProviders>
+                <Analytics />
             </body>
         </html>
     )
