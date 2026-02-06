@@ -6,8 +6,21 @@ import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
 import { useState, useEffect } from 'react';
 import { Reorder } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function FavoritesPage() {
+    const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+        const router = useRouter();
+        //If not logged in, pushes back to login page
+        useEffect(() => {
+            if (!isAuthenticated) {
+                router.push('/login');
+            }
+        }, [isAuthenticated, router]);
+    
+        if (!isAuthenticated) return null;
+
+
     const favorites = useSelector((state: RootState) => state.user.favorites);
     const [items, setItems] = useState(favorites);
     useEffect(() => {

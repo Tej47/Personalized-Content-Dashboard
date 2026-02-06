@@ -6,14 +6,26 @@ import { RootState } from '@/store/store';
 import { togglePreference } from '@/store/UserSlice';
 import { updateProfile, login, logout } from '@/store/UserSlice';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 
 export default function SettingsPage() {
+    const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+    const router = useRouter();
+    //If not logged in, pushes back to login page
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/login');
+        }
+    }, [isAuthenticated, router]);
+
+    if (!isAuthenticated) return null;
+
     const dispatch = useDispatch();
     const preferences = useSelector((state: RootState) => state.user.preferences);
 
     const user = useSelector((state: RootState) => state.user.user);
-    const router = useRouter();
+
 
     const availableCategories = [
         'technology', 'business', 'sports', 'entertainment', 'health', 'science'
@@ -41,8 +53,8 @@ export default function SettingsPage() {
                                         key={category}
                                         onClick={() => dispatch(togglePreference(category))}
                                         className={`px-6 py-3 rounded-full font-medium capitalize transition-all duration-200 ${isActive
-                                                ? 'bg-blue-600 text-white shadow-lg scale-105'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            ? 'bg-blue-600 text-white shadow-lg scale-105'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                             }`}>
                                         {category} {isActive && '✓'}
                                     </button>
@@ -58,7 +70,7 @@ export default function SettingsPage() {
                             <p className='mt-2 text-sm'>Preferences are saved locally via Redux Persist.</p>
                         </div>
                     </div>
-                     
+
                     {/* Profile Editing - Updates the global user object in real-time */}
                     <div className="my-8 bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
                         <h2 className="text-xl font-semibold mb-4 dark:text-white">Profile Customization</h2>
