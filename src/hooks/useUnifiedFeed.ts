@@ -48,37 +48,43 @@ export const useUnifiedFeed = (searchQuery: string, page: number, isTrending: bo
         }
     }, [newsPrefs, isTrending, page, searchQuery]);
 
-    const unifiedData = useMemo(()=>{const nList = news?.articles?.map((a: any) => ({ ...a, contentType: 'news', id: a.url })) || [];
+    const unifiedData = useMemo(() => {
+        const nList = news?.articles?.map((a: any) => ({ ...a, contentType: 'news', id: a.url })) || [];
         const mList = movies?.results?.map((m: any) => ({ ...m, contentType: 'movie', id: m.id.toString() })) || [];
         const sList = page === 1 ? socialPosts.map((s) => ({ ...s, contentType: 'social', id: s.id })) : [];
         if (searchQuery) {
-        return [...nList, ...mList].sort((a, b) => {
-            const aTitle = (a.title || a.name || "").toLowerCase();
-            const bTitle = (b.title || b.name || "").toLowerCase();
-            const query = searchQuery.toLowerCase();
-            
-            // Exact match priority
-            if (aTitle.startsWith(query) && !bTitle.startsWith(query)) return -1;
-            if (!aTitle.startsWith(query) && bTitle.startsWith(query)) return 1;
-            return 0;
-        });
-    }
+            return [...nList, ...mList].sort((a, b) => {
+                const aTitle = (a.title || a.name || "").toLowerCase();
+                const bTitle = (b.title || b.name || "").toLowerCase();
+                const query = searchQuery.toLowerCase();
+
+                // Exact match priority
+                if (aTitle.startsWith(query) && !bTitle.startsWith(query)) return -1;
+                if (!aTitle.startsWith(query) && bTitle.startsWith(query)) return 1;
+                return 0;
+            });
+        }
         const combined = [];
         const max = Math.max(nList.length, mList.length);
-        
-        for (let i = 0; i < max; i++) {
+        const totalItems = Math.max(nList.length, mList.length, sList.length * 3);
+
+        //iterate based on the largest list available
+        for (let i = 0; i < totalItems; i++) {
             if (nList[i]) combined.push(nList[i]);
             if (mList[i]) combined.push(mList[i]);
-            // Injecting social posts after every few items
-            const socialIndex = Math.floor(i / 3);
-            if (i % 3 === 0 && sList[socialIndex]) {
-                combined.push(sList[socialIndex]);
+
+            // Injecting social posts every 3 items
+            if (i % 3 === 0) {
+                const socialIndex = i / 3;
+                if (sList[socialIndex]) {
+                    combined.push(sList[socialIndex]);
+                }
             }
         }
         return combined;
-    }, [news, movies , socialPosts, page]);
+    }, [news, movies, socialPosts, page]);
 
-     
+
 
     return {
         data: unifiedData,
