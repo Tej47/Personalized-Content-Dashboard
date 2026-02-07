@@ -3,7 +3,7 @@ import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
-import { togglePreference } from '@/store/UserSlice';
+import { toggleNewsPreference, toggleMoviePreference } from '@/store/UserSlice';
 import { updateProfile, login, logout } from '@/store/UserSlice';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -11,7 +11,8 @@ import { useEffect } from 'react';
 
 export default function SettingsPage() {
     const dispatch = useDispatch();
-    const preferences = useSelector((state: RootState) => state.user.preferences);
+    // const preferences = useSelector((state: RootState) => state.user.preferences);
+    const { news: newsPrefs, movies: moviePrefs } = useSelector((state: RootState) => state.user.preferences);
 
     const user = useSelector((state: RootState) => state.user.user);
 
@@ -19,7 +20,18 @@ export default function SettingsPage() {
     const availableCategories = [
         'technology', 'business', 'sports', 'entertainment', 'health', 'science'
     ];
-    
+
+    const availableGenres = [
+        "SciFi",
+        "Documentary",
+        "Action",
+        "Comedy",
+        "Drama",
+        "Horror",
+        "Adventure",
+        "Animation",
+    ]
+
     const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
     const router = useRouter();
     //If not logged in, pushes back to login page
@@ -43,15 +55,36 @@ export default function SettingsPage() {
 
                     {/* Content Personalization Section */}
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
-                        <h2 className='text-xl font-semibold mb-4 dark:text-white'>Content Preferences</h2>
+                        <h2 className='text-xl font-semibold mb-4 dark:text-white'>News Preferences</h2>
                         <p className='text-gray-500 mb-6'>Select Categories to customize your personalized feed.</p>
                         <div className='flex flex-wrap gap-3'>
                             {availableCategories.map((category) => {
-                                const isActive = preferences.includes(category);
+                                const isActive = newsPrefs.includes(category);
                                 return (
                                     <button
                                         key={category}
-                                        onClick={() => dispatch(togglePreference(category))}
+                                        onClick={() => dispatch(toggleNewsPreference(category))}
+                                        className={`px-6 py-3 rounded-full font-medium capitalize transition-all duration-200 ${isActive
+                                            ? 'bg-blue-600 text-white shadow-lg scale-105'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}>
+                                        {category} {isActive && '✓'}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800">
+                        <h2 className='text-xl font-semibold mb-4 dark:text-white'>Movie Preferences</h2>
+                        <p className='text-gray-500 mb-6'>Select Genres to customize your personalized feed.</p>
+                        <div className='flex flex-wrap gap-3'>
+                            {availableGenres.map((category) => {
+                                const isActive = moviePrefs.includes(category);
+                                return (
+                                    <button
+                                        key={category}
+                                        onClick={() => dispatch(toggleMoviePreference(category))}
                                         className={`px-6 py-3 rounded-full font-medium capitalize transition-all duration-200 ${isActive
                                             ? 'bg-blue-600 text-white shadow-lg scale-105'
                                             : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'

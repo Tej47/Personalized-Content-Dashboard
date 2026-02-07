@@ -10,7 +10,10 @@ interface UserProfile {
 interface UserState {
     user: UserProfile | null;
     isAuthenticated: boolean;
-    preferences: string[];
+    preferences: {
+        news: string[];
+        movies: string[];
+    }
     favorites: any[];
     isDarkMode: boolean;
 }
@@ -18,7 +21,10 @@ interface UserState {
 const initialState: UserState = {
     user: null,
     isAuthenticated: false,
-    preferences: ['technology'],
+    preferences: {
+        news: ['technology'],
+        movies: ['Action']
+    },
     favorites: [],
     isDarkMode: false
 };
@@ -35,23 +41,40 @@ export const userSlice = createSlice({
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
-            state.preferences = initialState.preferences; 
-            state.favorites = []; 
+            state.preferences = initialState.preferences;
+            state.favorites = [];
         },
         updateProfile: (state, action: PayloadAction<Partial<UserProfile>>) => {
             if (state.user) {
                 state.user = { ...state.user, ...action.payload };
             }
         },
-        togglePreference: (state, action: PayloadAction<string>) => {
+        toggleNewsPreference: (state, action: PayloadAction<string>) => {
             const category = action.payload;
-            if (state.preferences.includes(category)) {
-                // Does not let the preferences to be 0
-                if (state.preferences.length > 1) {
-                    state.preferences = state.preferences.filter((p) => p !== category);
+            const isExist = state.preferences.news.includes(category);
+
+            if (isExist) {
+                if (state.preferences.news.length > 1) {
+                    state.preferences.news = state.preferences.news.filter((p) => p !== category);
                 }
             } else {
-                state.preferences.push(category);
+                // To Prevent large number of API calls on every page
+                if (state.preferences.news.length < 3) {
+                    state.preferences.news.push(category);
+                } else {
+                    alert("Limit preferences to 3 for best results and faster loading!");
+                }
+            }
+        },
+        // New: handles Movie Genres specifically
+        toggleMoviePreference: (state, action: PayloadAction<string>) => {
+            const genreId = action.payload;
+            if (state.preferences.movies.includes(genreId)) {
+                if (state.preferences.movies.length > 1) {
+                    state.preferences.movies = state.preferences.movies.filter((id) => id !== genreId);
+                }
+            } else {
+                state.preferences.movies.push(genreId);
             }
         },
         toggleFavorite: (state, action: PayloadAction<any>) => {
@@ -69,5 +92,5 @@ export const userSlice = createSlice({
     }
 })
 
-export const { toggleFavorite, togglePreference, setDarkMode, login, logout, updateProfile } = userSlice.actions;
+export const { toggleFavorite, toggleMoviePreference, toggleNewsPreference, setDarkMode, login, logout, updateProfile } = userSlice.actions;
 export default userSlice.reducer

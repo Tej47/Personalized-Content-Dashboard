@@ -8,48 +8,78 @@ import { CATEGORY_TO_GENRE } from "@/utils/categoryMap";
 import { useMemo } from "react";
 
 export const useUnifiedFeed = (searchQuery: string, page: number, isTrending: boolean = false) => {
-    const preferences = useSelector((state: RootState) => state.user.preferences);
+    // const preferences = useSelector((state: RootState) => state.user.preferences);
+    const { news: newsPrefs, movies: moviePrefs } = useSelector((state: RootState) => state.user.preferences);
     const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
-    
-    // If User is on Trending page, uses "general", else uses the User's preferences
-    const activeCategories = isTrending ? 'general' : (preferences.join(','));
-    
-    // To generate the Genre ID from preferences
-    const genreIds = isTrending
-        ? undefined
-        : preferences
-            .map(cat => CATEGORY_TO_GENRE[cat])
+
+    // If User is on Trending page or has a search query, uses "general", else uses the User's preferences
+    const activeNewsCategories = (isTrending || searchQuery) ? 'general' : newsPrefs.join(',');
+    const genreIds = useMemo(() => {
+        if (isTrending || searchQuery) return undefined;
+        // Map the names from settings (e.g., "SciFi") to IDs (e.g., "878")
+        return moviePrefs
+            .map(pref => CATEGORY_TO_GENRE[pref] || pref)
             .filter(Boolean)
-            .join(',');
+            .join('|');
+    }, [moviePrefs, isTrending, searchQuery]);
 
     const { data: news, isFetching: newsLoading } = useGetTopHeadlinesQuery({
-        category: activeCategories,
+        category: activeNewsCategories,
         page,
-        searchQuery
+        searchQuery: searchQuery || undefined
     })
 
     const { data: movies, isFetching: moviesLoading } = useGetTrendingMoviesQuery({
         page,
         genreId: genreIds,
-        searchQuery: searchQuery
+        searchQuery: searchQuery || undefined
     });
 
     useEffect(() => {
         if (page === 1) {
             const getSocial = async () => {
-                const categoriesToQuery = isTrending ? ['trending'] : preferences;
-                const posts = await fetchMockSocialPosts(categoriesToQuery);
+                const categoriesToQuery = isTrending ? ['trending'] : newsPrefs;
+                let posts = await fetchMockSocialPosts(categoriesToQuery);
+                if (searchQuery) {
+                    posts = posts.filter(p => p.content.toLowerCase().includes(searchQuery.toLowerCase()));
+                }
                 setSocialPosts(posts);
             };
             getSocial();
         }
-    }, [preferences, isTrending, page]);
+    }, [newsPrefs, isTrending, page, searchQuery]);
 
-    const unifiedData = [
-        ...(news?.articles?.map((a: any) => ({ ...a, contentType: 'news', id: a.url })) || []),
-        ...(movies?.results?.map((m: any) => ({ ...m, contentType: 'movie', id: m.id.toString() })) || []),
-        ...(page === 1 ? socialPosts.map((s) => ({ ...s, contentType: 'social', id: s.id })) : [])
-    ];
+    const unifiedData = useMemo(()=>{const nList = news?.articles?.map((a: any) => ({ ...a, contentType: 'news', id: a.url })) || [];
+        const mList = movies?.results?.map((m: any) => ({ ...m, contentType: 'movie', id: m.id.toString() })) || [];
+        const sList = page === 1 ? socialPosts.map((s) => ({ ...s, contentType: 'social', id: s.id })) : [];
+        if (searchQuery) {
+        return [...nList, ...mList].sort((a, b) => {
+            const aTitle = (a.title || a.name || "").toLowerCase();
+            const bTitle = (b.title || b.name || "").toLowerCase();
+            const query = searchQuery.toLowerCase();
+            
+            // Exact match priority
+            if (aTitle.startsWith(query) && !bTitle.startsWith(query)) return -1;
+            if (!aTitle.startsWith(query) && bTitle.startsWith(query)) return 1;
+            return 0;
+        });
+    }
+        const combined = [];
+        const max = Math.max(nList.length, mList.length);
+        
+        for (let i = 0; i < max; i++) {
+            if (nList[i]) combined.push(nList[i]);
+            if (mList[i]) combined.push(mList[i]);
+            // Injecting social posts after every few items
+            const socialIndex = Math.floor(i / 3);
+            if (i % 3 === 0 && sList[socialIndex]) {
+                combined.push(sList[socialIndex]);
+            }
+        }
+        return combined;
+    }, [news, movies , socialPosts, page]);
+
+     
 
     return {
         data: unifiedData,
