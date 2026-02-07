@@ -57,7 +57,8 @@ export const ContentCard = ({item, type, index=0, moveItem =()=>{}}: ContentCard
             style={{ opacity: isDragging ? 0.4 : 1 }}
             className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-[450px] cursor-move transition-shadow hover:shadow-2xl"
         >
-            <div className="relative h-48 w-full bg-gray-200 dark:bg-gray-700">
+            <div data-testid="content-card" className="relative h-48 w-full bg-gray-200 dark:bg-gray-700">
+                
                 {image ? (
                     <img src={image} alt={title} className="w-full h-full object-cover pointer-events-none"/>                  
                 ):(

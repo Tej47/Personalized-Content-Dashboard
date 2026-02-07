@@ -30,7 +30,7 @@ export const Header = ({onSearch}: HeaderProps) =>{
             />
             </div>
             <div className='flex items-center gap-4'>
-                <button onClick={()=>dispatch(setDarkMode(!isDarkMode))}
+                <button data-testid="theme-toggle" onClick={()=>dispatch(setDarkMode(!isDarkMode))}
                 className='p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors'>
                     {isDarkMode ? '🌙' : '☀️'}
                 </button>

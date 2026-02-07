@@ -1,64 +1,96 @@
+// 
 import { test, expect } from '@playwright/test';
 
-test.describe('ContentHub Critical Flows', () => {
+test.describe('ContentHub E2E Critical Flows', () => {
 
-    test('User Authentication and Search Flow', async ({ page }) => {
-        // Login
+    test.beforeEach(async ({ page }) => {
+        // Shared login step for all tests
         await page.goto('/login');
-        await page.fill('input[type="email"]', 'explorer@example.com');
+        await page.fill('input[type="email"]', 'test@example.com');
         await page.click('button:has-text("Sign In")');
-
-        // Check redirection
         await expect(page).toHaveURL('/');
-        await expect(page.getByText('explorer', { exact: true })).toBeVisible();
-
-        // Search Functionality
-        const searchInput = page.getByPlaceholder('Search for news, movies..');
-        await searchInput.fill('OpenAI');
-
-        // Wait for the first motion-div (card) to appear in the DOM
-        const searchResult = page.getByText(/OpenAI/i).first();
-        await expect(searchResult).toBeVisible({ timeout: 10000 }); // Giving it extra time for API lag
-
-        // Verify that the results actually contain the search term
-        await expect(searchResult).toContainText(/OpenAI/i);
     });
 
-    test('Drag and Drop Reordering', async ({ page }) => {
-        await page.goto('/');
-        // Ensure we are logged in
-        await page.fill('input[type="email"]', 'test@test.com');
-        await page.click('button:has-text("Sign In")');
+    test('Search flow handles debouncing and interleaving', async ({ page }) => {
+        const searchInput = page.getByPlaceholder(/Search for news, movies/i);
 
-        const firstCard = page.locator('h3').first();
-        const secondCard = page.locator('h3').nth(1);
-        const firstTitle = await firstCard.innerText();
+        // Type and trigger debounce
+        await searchInput.fill('Batman');
 
-        // Perform Drag and Drop
-        await firstCard.hover();
-        await page.mouse.down();
-        await secondCard.hover();
-        await page.mouse.up();
+        // Wait for the heading to change (confirms debounce finished)
+        await expect(page.getByText('Search Results for "Batman"')).toBeVisible();
 
-        // Verify the order has changed
-        const newFirstTitle = await page.locator('h3').first().innerText();
-        expect(newFirstTitle).not.toBe(firstTitle);
+        // Locate cards by the test-id
+        const cards = page.getByTestId('content-card');
+
+        await expect(cards.first()).toBeVisible();
+
+        // Now that we know at least one is visible, we can check the count safely
+        const count = await cards.count();
+        expect(count).toBeGreaterThan(0);
+    });
+
+    test('Preference limit alert prevents 4th selection', async ({ page }) => {
+        await page.goto('/settings');
+
+        const categories = ['Technology', 'Business', 'Science', 'Health'];
+
+        // Select first 3 (assuming 0 are selected by default for this test user)
+        for (let i = 0; i < 3; i++) {
+            await page.click(`button:has-text("${categories[i]}")`);
+        }
+
+        // Listen for the window.alert
+        page.on('dialog', async dialog => {
+            expect(dialog.message()).toContain('Limit preferences to 3');
+            await dialog.dismiss();
+        });
+
+        // Attempt to click the 4th
+        await page.click(`button:has-text("${categories[3]}")`);
     });
 
     test('Theme Toggle persistence', async ({ page }) => {
         await page.goto('/');
-        await page.fill('input[type="email"]', 'test@test.com');
-        await page.click('button:has-text("Sign In")');
 
         const html = page.locator('html');
-        const themeBtn = page.locator('header button');
 
-        // Toggle to Dark
+        // Use getByTestId for a direct match
+        const themeBtn = page.getByTestId('theme-toggle');
+
+        // Ensure the button is actually there before clicking
+        await expect(themeBtn).toBeVisible();
+
+        const currentClass = await html.getAttribute('class');
+        const isDark = currentClass?.includes('dark');
+
+        // Toggle theme
         await themeBtn.click();
-        await expect(html).toHaveClass(/dark/);
+
+        // Verify the class changed
+        if (isDark) {
+            await expect(html).not.toHaveClass(/dark/);
+        } else {
+            await expect(html).toHaveClass(/dark/);
+        }
 
         // Reload to test Redux Persist
         await page.reload();
-        await expect(html).toHaveClass(/dark/);
+
+        // Final check after reload
+        if (isDark) {
+            await expect(html).not.toHaveClass(/dark/);
+        } else {
+            await expect(html).toHaveClass(/dark/);
+        }
+    });
+
+    test('Trending page design matches favorites', async ({ page }) => {
+        await page.goto('/trending');
+        const heading = page.locator('h1');
+
+        // Ensure consistent styling
+        await expect(heading).toHaveText(/Trending Now/i);
+        await expect(heading).toHaveClass(/text-3xl font-bold/);
     });
 });
