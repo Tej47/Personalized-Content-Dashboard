@@ -36,7 +36,7 @@ export const MainFeed = ({ searchQuery, isTrending = false }: MainFeedProps) => 
     useEffect(() => {
         if (data && data.length > 0 && !isLoading) {
         setMasterList((prev) => {
-            // If page is 1, we should probably REPLACE rather than APPEND
+            // If page is 1, we REPLACE rather than APPEND
             if (page === 1) {
                 const uniqueMap = new Map(data.map(item => [item.id, item]));
                 return Array.from(uniqueMap.values());

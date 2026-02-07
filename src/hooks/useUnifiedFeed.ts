@@ -8,7 +8,6 @@ import { CATEGORY_TO_GENRE } from "@/utils/categoryMap";
 import { useMemo } from "react";
 
 export const useUnifiedFeed = (searchQuery: string, page: number, isTrending: boolean = false) => {
-    // const preferences = useSelector((state: RootState) => state.user.preferences);
     const { news: newsPrefs, movies: moviePrefs } = useSelector((state: RootState) => state.user.preferences);
     const [socialPosts, setSocialPosts] = useState<SocialPost[]>([]);
 

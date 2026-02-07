@@ -66,7 +66,6 @@ export const userSlice = createSlice({
                 }
             }
         },
-        // New: handles Movie Genres specifically
         toggleMoviePreference: (state, action: PayloadAction<string>) => {
             const genreId = action.payload;
             if (state.preferences.movies.includes(genreId)) {
