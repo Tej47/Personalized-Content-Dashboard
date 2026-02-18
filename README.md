@@ -31,7 +31,7 @@ A smart, customizable dashboard that aggregates real-time news and movie trends.
 
 # 🚀 Vercel Deployment
 
-Follow link: https://personalized-content-dashboard-8j9wq5w9f.vercel.app/
+Follow link: https://personalized-content-dashboard-mu.vercel.app/
 ## ⚠️ Known Limitations
 
 **News API Restriction:**
